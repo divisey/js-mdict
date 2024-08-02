@@ -82,21 +82,38 @@ declare interface WordIndex {
 
 // public KeyListItem
 declare interface KeyListItem {
-    recordStartOffset: number;
-    keyText: string;
-  }
+  recordStartOffset: number;
+  keyText: string;
+}
+
+declare interface MdictOptions {
+  passcode: string;
+  debug: boolean;
+  resort: boolean;
+  isStripKey: boolean;
+  isCaseSensitive: boolean;
+}
+
 declare class Mdict extends mdict.MdictBase {
   constructor(path: string);
+  constructor(path: string, options: MdictOptions);
+
   lookup(word: string): WordDefinition;
+  locate(key: string): WordDefinition;
   prefix(word: string): Array<WordIndex>;
   suggest(word: string): Promise<Array<string>>;
-  fuzzy_search(word: string, fuzzy_size: number, ed_gap: number): Array<WordIndex>;
+  fuzzy_search(
+    word: string,
+    fuzzy_size: number,
+    ed_gap: number
+  ): Array<WordIndex>;
   associate(word: string): Array<WordIndex>;
   parse_defination(key: string, rofset: number): string;
-  rangeKeyWords(keep?:boolean): Array<KeyListItem>
+  rangeKeyWords(keep?: boolean): Array<KeyListItem>;
 }
 
 export { Mdict, WordDefinition, WordIndex };
 
 declare function Mdict(path: string): any;
+declare function Mdict(path: string, options: MdictOptions): any;
 export default Mdict;

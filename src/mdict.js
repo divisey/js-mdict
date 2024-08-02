@@ -4,7 +4,7 @@ import { lemmatizer } from 'lemmatizer';
 import MdictBase from './mdictbase';
 import common from './utils';
 
-class Mdict extends MdictBase {
+export class Mdict extends MdictBase {
   constructor(fname, options) {
     options = options || {};
     options = {
@@ -21,13 +21,22 @@ class Mdict extends MdictBase {
   }
 
   /**
-   * lookup 查询 mdx 词或 mdd 资源
+   * lookup 查询 mdx 词
    * @param {string} word the target word
    * @returns definition
    */
   lookup(word) {
     if (this.options.resort) {
-      return this._lookup_key_record(word);
+      const result = this._lookup_key_record(word);
+
+      if (this.header.StyleSheet) {
+        return {
+          ...result,
+          definition: this._substitute_stylesheet(result.definition),
+        };
+      }
+
+      return result;
     } else {
       throw new Error(
         'depreciated, use `option.resort = true` to find out word'
@@ -168,6 +177,20 @@ class Mdict extends MdictBase {
 
   suggest(phrase) {
     throw new Error('suggest method has been deprecated');
+  }
+
+  _substitute_stylesheet(txt) {
+    const txtTag = Array.from(txt.matchAll(/`(\d+)`/g));
+    const txtList = Array.from(txt.split(/`\d+`/g)).slice(1);
+
+    let styledTxt = '';
+
+    for (let i = 0; i < txtList.length; i++) {
+      const style = this.header.StyleSheet[txtTag[i][1]];
+      styledTxt += style[0] + txtList[i] + style[1];
+    }
+
+    return styledTxt;
   }
 
   _search_key_record(word) {

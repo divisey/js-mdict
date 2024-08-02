@@ -225,18 +225,6 @@ class MDictBase {
       this._encrypt = parseInt(this.header.Encrypted, 10);
     }
 
-    // stylesheet attribute if present takes from of:
-    // style_number # 1-255
-    // style_begin # or ''
-    // style_end # or ''
-    // TODO: splitstyle info
-
-    // header_info['_stylesheet'] = {}
-    // if header_tag.get('StyleSheet'):
-    //   lines = header_tag['StyleSheet'].splitlines()
-    //   for i in range(0, len(lines), 3):
-    //        header_info['_stylesheet'][lines[i]] = (lines[i + 1], lines[i + 2])
-
     // before version 2.0, number is 4 bytes integer alias, int32
     // version 2.0 and above use 8 bytes, alias int64
     this._version = parseFloat(this.header.GeneratedByEngineVersion);

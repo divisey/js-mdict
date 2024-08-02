@@ -1,5 +1,4 @@
 import BufferList from 'bl';
-import { DOMParser } from '@xmldom/xmldom';
 import ripemd128 from './ripemd128';
 
 const REGEXP_STRIPKEY = {
@@ -72,22 +71,44 @@ function levenshteinDistance(a, b) {
   return dp[m][n];
 }
 
+function unescapeEntities(text) {
+  text = text.replace(/&lt;/g, '<');
+  text = text.replace(/&gt;/g, '>');
+  text = text.replace(/&quot;/g, '"');
+  text = text.replace(/&amp;/g, '&');
+  
+  return text
+}
+
 /**
  * parse mdd/mdx header section
  * @param {string} header_text
  */
 function parseHeader(header_text) {
-  const doc = new DOMParser().parseFromString(header_text, 'text/xml');
-  const header_attr = {};
-  let elem = doc.getElementsByTagName('Dictionary')[0];
-  if (!elem) {
-    elem = doc.getElementsByTagName('Library_Data')[0]; // eslint_disable_prefer_destructing
+  const headerAttr = {};  
+
+  Array.from(header_text.matchAll(/(\w+)="((.|\r|\n)*?)"/g)).forEach((tag) => {
+    headerAttr[tag[1]] = unescapeEntities(tag[2])
+  })
+
+  // stylesheet attribute if present takes form of:
+  //   style_number # 1-255
+  //   style_begin  # or ''
+  //   style_end    # or ''
+  // store stylesheet in dict in the form of
+  // {'number' : ('style_begin', 'style_end')}
+  if (headerAttr.StyleSheet) {
+    const styleSheet = {};
+    const lines = headerAttr.StyleSheet.split(/[\r\n]+/g);
+
+    for (let i = 0; i < lines.length; i += 3) {
+      styleSheet[lines[i]] = [lines[i + 1], lines[i + 2]];
+    }
+
+    headerAttr.StyleSheet = styleSheet
   }
-  for (let i = 0, item; i < elem.attributes.length; i++) {
-    item = elem.attributes[i];
-    header_attr[item.nodeName] = item.nodeValue;
-  }
-  return header_attr;
+
+  return headerAttr;
 }
 
 /**
