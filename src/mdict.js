@@ -29,7 +29,7 @@ export class Mdict extends MdictBase {
     if (this.options.resort) {
       const result = this._lookup_key_record(word);
 
-      if (this.header.StyleSheet) {
+      if (this.header.StyleSheet && result.definition) {
         return {
           ...result,
           definition: this._substitute_stylesheet(result.definition),
